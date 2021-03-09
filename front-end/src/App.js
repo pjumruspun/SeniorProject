@@ -30,6 +30,7 @@ class App extends Component {
   state = {
     playing: false,
     url: "",
+    audiourl:"https://reelcrafter-east.s3.amazonaws.com/aux/test.m4a",
     played: 0.5,
     duration: 0,
     volume: 0.8,
@@ -44,7 +45,9 @@ class App extends Component {
     console.log(`New url: ${url}`);
     this.setState({ url: url });
   };
-
+  handleAudioUrlChange = (url) => {
+    this.setState({ audiourl: url });
+  };
   handleSeekMouseDown = (e) => {
     this.setState({ seeking: true, playing: false });
   };
@@ -108,7 +111,7 @@ class App extends Component {
     console.log(
       `saving url=${this.state.url}, projectId=${this.state.projectId}`
     );
-
+     
     axios
       .put(`http://localhost:3001/projects/${this.state.projectId}`, {
         videoURL: this.state.url,
@@ -118,18 +121,23 @@ class App extends Component {
       });
   };
 
-  handleImportProject = (fileName) => {
+  handleImportProject = (file) => {
     if (this.state.projectId == "") {
       alert(
         `You have no currently active project, please create a new project or open an existing project.`
       );
       return;
     }
-
-    const videoDirectory = `videos/${fileName}`;
+    const videoDirectory = `videos/${file.name}`;
+    const audioDirectory = `original-soundtracks/${file.name}`;
     this.handleUrlChange(videoDirectory);
     axios.put(`http://localhost:3001/projects/${this.state.projectId}`, {
       videoURL: videoDirectory,
+    });
+    var bodyFormData = new FormData();
+    bodyFormData.append('files', file);
+    axios.post(`http://localhost:3001/audio-utility/convert`,bodyFormData, {
+
     });
   };
 
@@ -145,6 +153,7 @@ class App extends Component {
   render() {
     const {
       url,
+      audiourl,
       played,
       duration,
       playing,
@@ -163,7 +172,7 @@ class App extends Component {
           onURLChange={(url) => this.handleUrlChange(url)}
           onProjectChange={(project) => this.handleProjectChange(project)}
           onSaveProject={() => this.handleSaveProject()}
-          onImport={(fileName) => this.handleImportProject(fileName)}
+          onImport={(file) => this.handleImportProject(file)}
         />
         <header>
           <p>{topText}</p>
@@ -241,6 +250,7 @@ class App extends Component {
           playing={playing}
           played={duration * played}
           onSelected={this.handleSelected}
+          url={audiourl}
         />
 
         <div id="zoom">

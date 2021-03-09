@@ -56,7 +56,7 @@ export default function SimpleMenu(props) {
     file = files.item(0);
     if (file) console.log(file.name);
 
-    props.onImport(file.name);
+    props.onImport(file);
 
     // var formData = new FormData();
     // formData.append("upload", file);
